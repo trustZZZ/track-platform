@@ -1,0 +1,33 @@
+# Локальный запуск всего стека: backend (FastAPI) + frontend (nginx + React).
+#
+#   docker compose up -d --build
+#   http://localhost:3001            — фронтенд (API проксируется на /api)
+#   http://localhost:8001/api/health — API напрямую
+#
+# Порты вынесены в переменные, чтобы не конфликтовать с другими проектами:
+#   BACKEND_PORT (по умолчанию 8001), FRONTEND_PORT (по умолчанию 3001)
+# Переменные окружения могут переопределяться через .env (см. .env.example)
+
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      APP_NAME: ${APP_NAME:-track-platform}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      HOST: 0.0.0.0
+      PORT: 8000
+      SESSION_SECRET: ${SESSION_SECRET:-dev-insecure-secret}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./track-platform.db}
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3001}:80"

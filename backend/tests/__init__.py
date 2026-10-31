@@ -1,0 +1,1 @@
+"""Тесты backend fullstack-шаблона."""
